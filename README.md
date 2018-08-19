@@ -1,4 +1,4 @@
-This is a simple chess engine(just the chess game logic for know) written by me in Java to learn the language while doing something intresting.
+This is a simple chess engine(just the chess game logic for now) written in Java to learn the language while doing something intresting.
 
 It still lacks some features like:
 
