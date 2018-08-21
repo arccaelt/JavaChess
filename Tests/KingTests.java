@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Test;
 
-import com.engine.board.Board;
+import Board.Board;
 
 public class KingTests {
 
@@ -14,7 +14,7 @@ public class KingTests {
 	@After
 	public void resetBoard()
 	{
-		b.resetBoard();
+		b.initBoard();
 	}
 
 	@Test

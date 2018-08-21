@@ -1,38 +1,90 @@
-import com.engine.board.*;
+import java.util.InputMismatchException;
 import java.util.Scanner;
-import com.engine.algorithms.*;
+
+import Board.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 class Run {
-	public static void main(String[] args)
+	private static void displayHelpMessage()
 	{
-		Board b = new Board();
-		Scanner scn = new Scanner(System.in);
-		
+		System.out.println("Options are:");
+		System.out.println("\t 0 for quit(while ingame)");
+		System.out.println("\t 1 for continue");
+		System.out.println("\t 2 to save the current game");
+		System.out.println("\t 3 to load a game");
+	}
+	
+	private static void mainloop(Board b, Scanner scn) throws IOException
+	{
 		boolean end = false;
 		
 		int x, y, nx, ny;
-		while(1 == 1)
+		while(!end)
 		{
-			//System.out.print("End? (1 = yes/0 = no): ");
-			//int q = scn.nextInt();
+			try
+			{
+				System.out.println("> ");
+				int q = scn.nextInt();
 			
-			if(0 == 1)
-			{
-				end = true;
+				if(q == 0)
+				{
+					end = true;
+				}
+				else if(q == 2)
+				{
+					ObjectOutputStream ow = new ObjectOutputStream(new FileOutputStream(new File("./savegame.dat")));
+					ow.writeObject(b);
+					ow.close();
+					
+					System.out.println("Game saved!");
+				}
+				else
+				{
+					System.out.println(b);
+					System.out.print("Enter move (x, y, new_x, new_y): ");
+					x = scn.nextInt();
+					y = scn.nextInt();
+					nx = scn.nextInt();
+					ny = scn.nextInt();
+					b.move(new Move(x, y, nx, ny));
+				}
 			}
-			else
+			catch(InputMismatchException exo)
 			{
-				System.out.println(b);
-				System.out.print("Enter move (x, y, new_x, new_y): ");
-				x = scn.nextInt();
-				y = scn.nextInt();
-				nx = scn.nextInt();
-				ny = scn.nextInt();
-				b.move(x, y, nx, ny);
+				System.out.println("Invalid input");
+				break;
 			}
 		}
+	}
+	
+	public static void main(String[] args) throws ClassNotFoundException, IOException
+	{
+		Scanner scn = new Scanner(System.in);
+		displayHelpMessage();
 		
-		//scn.close();
-		//System.out.println("Game over");
+		int q = scn.nextInt();
+		if(q == 1)
+		{
+			mainloop(new Board(), scn);
+		}
+		else if(q == 3)
+		{
+			System.out.println("Give path to save game: ");
+			String pth = scn.next();
+			System.out.println("Path: " + pth);
+			
+			ObjectInputStream or = new ObjectInputStream(new FileInputStream(new File(pth)));
+			mainloop((Board)or.readObject(), scn);
+			or.close();
+		}
+		
+		scn.close();
+		System.out.println("Game over");
 	}
 }

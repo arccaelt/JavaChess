@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Test;
 
-import com.engine.board.Board;
+import Board.Board;
 
 public class RookTests {
 
@@ -14,7 +14,7 @@ public class RookTests {
 	@After
 	public void resertBoard()
 	{
-		b.resetBoard();
+		b.initBoard();
 	}
 	
 	@Test
