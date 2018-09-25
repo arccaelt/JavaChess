@@ -1,14 +1,7 @@
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
+import java.util.*;
 import Board.*;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import GUI.*;
 
 class Run {
 	private static void displayHelpMessage()
@@ -52,7 +45,10 @@ class Run {
 					y = scn.nextInt();
 					nx = scn.nextInt();
 					ny = scn.nextInt();
-					b.move(new Move(x, y, nx, ny));
+					
+					
+					if(!b.move(new Move(x, y, nx, ny)))
+						System.out.println("Invalid move");
 				}
 			}
 			catch(InputMismatchException exo)
@@ -65,26 +61,29 @@ class Run {
 	
 	public static void main(String[] args) throws ClassNotFoundException, IOException
 	{
-		Scanner scn = new Scanner(System.in);
-		displayHelpMessage();
+		Board b = new Board();
+		BoardUI gui = new BoardUI(b);
+//		Scanner scn = new Scanner(System.in);
+//		displayHelpMessage();
+//		
+//		int q = scn.nextInt();
+//		if(q == 1)
+//		{
+//			mainloop(new Board(), scn);
+//		}
+//		else if(q == 3)
+//		{
+//			System.out.println("Give path to save game: ");
+//			String pth = scn.next();
+//			System.out.println("Path: " + pth);
+//			
+//			ObjectInputStream or = new ObjectInputStream(new FileInputStream(new File(pth)));
+//			mainloop((Board)or.readObject(), scn);
+//			or.close();
+//		}
+//		
+//		scn.close();
+//		System.out.println("Game over");
 		
-		int q = scn.nextInt();
-		if(q == 1)
-		{
-			mainloop(new Board(), scn);
-		}
-		else if(q == 3)
-		{
-			System.out.println("Give path to save game: ");
-			String pth = scn.next();
-			System.out.println("Path: " + pth);
-			
-			ObjectInputStream or = new ObjectInputStream(new FileInputStream(new File(pth)));
-			mainloop((Board)or.readObject(), scn);
-			or.close();
-		}
-		
-		scn.close();
-		System.out.println("Game over");
 	}
 }

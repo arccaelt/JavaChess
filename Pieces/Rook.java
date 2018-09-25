@@ -1,7 +1,7 @@
 package Pieces;
 
 import static Board.Board.*;
-import static Pieces.PieceValue.*;
+import static Pieces.PieceData.*;
 import static java.lang.Math.abs;
 
 import java.io.Serializable;
@@ -9,11 +9,24 @@ import java.io.Serializable;
 import Board.Move;
 import Pieces.Piece;
 
-public final class Rook extends Piece implements Serializable
+public final class Rook extends Piece implements Movable, Serializable
 {
+	public boolean was_moved;
 	public Rook(int color)
 	{
-		super(ROOK.getValue(), color, ROOK.getMoveCells(), true, false, true, "Rook");
+		super(color, PieceData.ROOK);
+	}
+	
+	@Override
+	public boolean isMoved()
+	{
+		return was_moved;
+	}
+	
+	@Override
+	public void setMoved()
+	{
+		was_moved = true;
 	}
 	
 	public boolean isValidMove(Move mv, Piece board[][])
@@ -56,16 +69,12 @@ public final class Rook extends Piece implements Serializable
 			if(nx > x)
 			{
 				if(checkColumnUp(x, y, nx, board))
-				{
 					return false;
-				}
 			}
 			else
 			{
 				if(checkColumnDown(x, y, nx, board))
-				{
 					return false;
-				}
 			}
 		}		
 		

@@ -18,5 +18,4 @@ public class TestMoves
 		assertFalse((new Move(2, 0, -1, 4)).isValid());
 		assertFalse((new Move(-1, 0, -3, 9)).isValid());
 	}
-
 }

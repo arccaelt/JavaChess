@@ -1,7 +1,7 @@
 package Pieces;
 
 import static Board.Board.*;
-import static Pieces.PieceValue.*;
+import static Pieces.PieceData.*;
 import static java.lang.Math.abs;
 
 import java.io.Serializable;
@@ -9,13 +9,25 @@ import java.io.Serializable;
 import Board.Move;
 import Pieces.Piece;
 
-public class King extends Piece implements Serializable
+public class King extends Piece implements Serializable, Movable
 {
-	private boolean wasChecked;
+	public boolean was_moved;
 	
 	public King(int color)
 	{
-		super(KING.getValue(), color, KING.getMoveCells(), true, true, true, "King");
+		super(color, PieceData.KING);
+	}
+	
+	@Override
+	public boolean isMoved()
+	{
+		return was_moved;
+	}
+	
+	@Override
+	public void setMoved()
+	{
+		was_moved = true;
 	}
 	
 	public boolean isValidMove(Move mv, Piece board[][])
@@ -28,15 +40,13 @@ public class King extends Piece implements Serializable
 		int distance_x = abs(x - nx);
 		int distance_y = abs(y - ny);
 		
-		if(distance_x > board[x][y].move_cells || distance_y > board[x][y].move_cells)
+		if(distance_x > board[x][y].info.move_cells || distance_y > board[x][y].info.move_cells)
 		{
-			System.out.println("overmove");
 			return false;
 		}
 		
-		if(board[nx][ny] != null && board[nx][ny].isSame(board[x][y]))
+		if(board[nx][ny] != null && board[nx][ny].equals(board[x][y]))
 		{
-			System.out.println("the same");
 			return false;
 		}
 		
@@ -54,6 +64,112 @@ public class King extends Piece implements Serializable
 		
 		return true;
 	}
+	
+	/*
+	 * Method that test if the king can castle/move
+	 * You cannot castle if:
+	 *   Your king has been moved earlier in the game.
+	 *   The rook that you would castle with has been moved earlier in the game.
+	 *   There are pieces standing between your king and rook.
+	 *   The king is in check.
+	 *   The king moves through a square that is attacked by a piece of the opponent.
+	 *   The king would be in check after castling. 
+	 */
+	public boolean canCastle(Move mv, Piece board[][])
+	{
+		// If the king or rook was moved then we cannot be castled
+		if(was_moved)
+			return false;
+		
+		if(board[mv.x][mv.y] instanceof Rook)
+			if(((Rook)board[mv.x][mv.y]).was_moved)
+				return false;
+		
+		if(board[mv.nx][mv.ny] instanceof Rook)
+			if(((Rook)board[mv.nx][mv.ny]).was_moved)
+				return false;
+		
+		System.out.println("not moved");
+		// make sure we try to move then horizontally
+		if(mv.x != mv.nx)
+			return false;
+		
+		// also, make sure the distance is right
+		if(mv.ny > mv.y)
+		{
+			if(mv.ny - mv.y != 3)
+			{
+				System.out.println("failed here");
+				return false;
+			}
+		}
+		else
+		{
+			if(mv.ny - mv.y != 4)
+				return false;
+		}
+		
+		System.out.println("pass 2");
+		
+		// check if the king is in check
+		if(isAttacked(mv.x, mv.y, board))
+			return false;
+		
+		// check if there are pieces between the rook and the king
+		// also, check if the king moves thry attacked squares
+		if(mv.ny > mv.y)
+		{
+			for(int i = mv.y + 1; i < mv.ny; i++)
+			{
+				if(board[mv.x][i] != null)
+					return false;
+			}
+		}
+		else
+		{
+			for(int i = mv.y - 1; i > mv.ny; i--)
+			{
+				if(board[mv.x][i] != null)
+					return false;
+			}
+		}
+		
+		// also, check if the king moves thru attacked squares
+		// NOTE: Ugly hack because we create King objects at some locations and then
+		// use the isAttacked method to test if it's attacked
+		if(mv.ny > mv.y)
+		{
+			for(int i = mv.y + 1; i < mv.ny; i++)
+			{
+				board[mv.x][i] = new King(board[mv.x][mv.y].color);
+				if(isAttacked(mv.x, i, board))
+				{
+					board[mv.x][i] = null;
+					return false;
+				}
+				board[mv.x][i] = null;
+			}
+		}
+		else
+		{
+			for(int i = mv.y - 1; i > mv.ny; i--)
+			{
+				board[mv.x][i] = new King(board[mv.x][mv.y].color);
+				if(isAttacked(mv.x, i, board))
+				{
+					board[mv.x][i] = null;
+					return false;
+				}
+				board[mv.x][i] = null;
+			}
+		}
+		
+		// check if the king would be in check after castle
+		if(isAttacked(mv.nx, mv.ny, board))
+			return false;
+		
+		return true;
+	}
 
 	// NOTE: Even tho the board has a instance of a King object in it
 	// that instance is being referenced by a variable of its superclass, 'Piece'
@@ -61,7 +177,7 @@ public class King extends Piece implements Serializable
 	// defined in the Piece class and not the unique stuff i've added here.
 	// The magic of upcasting....
 	@Override
-	public boolean isAttacked(int x, int y, Piece board[][])
+	boolean isAttacked(int x, int y, Piece board[][])
 	{
 		// NOTE: The code here is kinda duplicated because i modify the checkDiagonal.., checkColumn
 		// methods just a bit.
@@ -77,15 +193,15 @@ public class King extends Piece implements Serializable
 		{
 			if(board[i][j] != null)
 			{
-				if(board[i][j].isSame(board[x][y]))
+				if(board[i][j].equals(board[x][y]))
 				{
 					return false;
 				}
 				else
 				{
-					if(board[i][j].can_move_on_diagonals && abs(i - x) <= board[i][j].move_cells_diagonals)
+					if(board[i][j].info.can_move_on_diagonals && abs(i - x) <= board[i][j].info.move_cells_diagonals)
 	 				{
-						System.out.println("check1");
+						System.out.println("fail1");
 						return true;
 					}
 					else
@@ -100,16 +216,14 @@ public class King extends Piece implements Serializable
 		{
 			if(board[i][j] != null)
 			{
-				if(board[i][j].isSame(board[x][y]))
+				if(board[i][j].equals(board[x][y]))
 				{
 					return false;
 				}
 				else
 				{
-					System.out.printf("here %d %d\n", abs(i - x), board[i][j].move_cells_diagonals);
-					if(board[i][j].can_move_on_diagonals && abs(i - x) <= board[i][j].move_cells_diagonals)
+					if(board[i][j].info.can_move_on_diagonals && abs(i - x) <= board[i][j].info.move_cells_diagonals)
 	 				{
-						System.out.println("check2");
 						return true;
 					}
 					else
@@ -124,15 +238,14 @@ public class King extends Piece implements Serializable
 		{
 			if(board[i][j] != null)
 			{
-				if(board[i][j].isSame(board[x][y]))
+				if(board[i][j].equals(board[x][y]))
 				{
 					return false;
 				}
 				else
 				{
-					if(board[i][j].can_move_on_diagonals && abs(i - x) <= board[i][j].move_cells_diagonals)
+					if(board[i][j].info.can_move_on_diagonals && abs(i - x) <= board[i][j].info.move_cells_diagonals)
 	 				{
-						System.out.println("check3");
 						return true;
 					}
 					else
@@ -147,15 +260,14 @@ public class King extends Piece implements Serializable
 		{
 			if(board[i][j] != null)
 			{
-				if(board[i][j].isSame(board[x][y]) && abs(i - x) <= board[i][j].move_cells_diagonals)
+				if(board[i][j].equals(board[x][y]) && abs(i - x) <= board[i][j].info.move_cells_diagonals)
 				{
 					return false;
 				}
 				else
 				{
-					if(board[i][j].can_move_on_diagonals)
+					if(board[i][j].info.can_move_on_diagonals)
 	 				{
-						System.out.println("check4");
 						return true;
 					}
 					else
@@ -171,15 +283,14 @@ public class King extends Piece implements Serializable
 		{
 			if(board[i][y] != null)
 			{
-				if(board[i][y].isSame(board[x][y]))
+				if(board[i][y].equals(board[x][y]))
 				{
 					return false;
 				}
 				else
 				{
-					if(board[i][y].can_move_forward && board[i][y].move_cells >= abs(x - i))
+					if(board[i][y].info.can_move_forward && board[i][y].info.move_cells >= abs(x - i))
 	 				{
-						System.out.println("check5");
 						return true;
 					}
 					else
@@ -193,15 +304,14 @@ public class King extends Piece implements Serializable
 		{
 			if(board[i][y] != null)
 			{
-				if(board[i][y].isSame(board[x][y]))
+				if(board[i][y].equals(board[x][y]))
 				{
 					return false;
 				}
 				else
 				{
-					if(board[i][y].can_move_forward && board[i][y].move_cells >= abs(x - i))
+					if(board[i][y].info.can_move_forward && board[i][y].info.move_cells >= abs(x - i))
 	 				{
-						System.out.println("check6");
 						return true;
 					}
 					else
@@ -216,7 +326,7 @@ public class King extends Piece implements Serializable
 		{
 			if(board[x][i] != null)
 			{
-				if(!board[x][i].isSame(board[x][y]))
+				if(!board[x][i].equals(board[x][y]))
 				{
 					if(board[x][i] instanceof Rook || board[x][y] instanceof Queen)
 						return true;
@@ -232,7 +342,7 @@ public class King extends Piece implements Serializable
 		{
 			if(board[x][i] != null)
 			{
-				if(board[x][i].isSame(board[x][y]))
+				if(!board[x][i].equals(board[x][y]))
 				{
 					if(board[x][i] instanceof Rook || board[x][y] instanceof Queen)
 						return true;

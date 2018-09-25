@@ -72,7 +72,7 @@ public class PawnTests {
 	public void testLimitingMoves()
 	{
 		// Test that a pawn can be moved only once 2 cells(at the beggining)
-		b.move(1, 0, 2, 0);
-		assertFalse("After a pawn is moved once it shouldn't be able to move 2 cells again", b.move(2, 0, 4, 0));
+		assertTrue(b.move(1, 0, 3, 0));
+		assertFalse(b.move(1, 1, 4, 1));
 	}
 }

@@ -1,7 +1,7 @@
 package Pieces;
 
 import static Board.Board.*;
-import static Pieces.PieceValue.*;
+import static Pieces.PieceData.*;
 import static java.lang.Math.abs;
 
 import java.io.Serializable;
@@ -13,7 +13,7 @@ public final class Knight extends Piece implements Serializable
 {
 	public Knight(int color)
 	{
-		super(KNIGHT.getValue(), color, KNIGHT.getMoveCells(), true, true, true, "Knight");
+		super(color, PieceData.KNIGHT);
 	}
 
 	public boolean isValidMove(Move mv, Piece board[][])
@@ -36,14 +36,14 @@ public final class Knight extends Piece implements Serializable
 			return false;
 		}
 		
-		if(distance_x > board[x][y].move_cells || distance_y > board[x][y].move_cells)
+		if(distance_x > board[x][y].info.move_cells || distance_y > board[x][y].info.move_cells)
 		{
 			return false;
 		}
 		
 		if(board[nx][ny] != null)
 		{
-			if(board[nx][ny].isSame(board[x][y]))
+			if(board[nx][ny].equals(board[x][y]))
 			{
 				return false;
 			}

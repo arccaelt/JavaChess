@@ -1,18 +1,30 @@
 package Pieces;
 
 import static Board.Board.*;
-import static Pieces.PieceValue.*;
+import static Pieces.PieceData.*;
 import static java.lang.Math.abs;
 import java.io.Serializable;
 import Board.Move;
 import Pieces.Piece;
 
-public final class Pawn extends Piece implements Serializable
+public final class Pawn extends Piece implements Serializable, Movable
 {
+	public boolean was_moved;
 	public Pawn(int color)
 	{
-		super(PAWN.getValue(), color, PAWN.getMoveCells(), true, true, false, "Pawn");
-		move_cells_diagonals = 1;
+		super(color, PieceData.PAWN);
+	}
+	
+	@Override
+	public boolean isMoved()
+	{
+		return was_moved;
+	}
+	
+	@Override
+	public void setMoved()
+	{
+		was_moved = true;
 	}
 	
 	public boolean isValidMove(Move mv, Piece board[][])
@@ -29,7 +41,7 @@ public final class Pawn extends Piece implements Serializable
 		// only if we capture an enemy piece
 		if(x != nx && y != ny)
 		{
-			if(board[nx][ny] == null || board[nx][ny].isSame(board[x][y]))
+			if(board[nx][ny] == null || board[nx][ny].equals(board[x][y]))
 			{
 				return false;
 			}
@@ -42,7 +54,7 @@ public final class Pawn extends Piece implements Serializable
 		{
 			if(board[x][y].color == black)
 			{
-				if(nx < x || ny != y || distance_x > board[x][y].move_cells)
+				if(nx < x || ny != y || distance_x > board[x][y].info.move_cells)
 				{
 					return false;
 				}
@@ -53,7 +65,7 @@ public final class Pawn extends Piece implements Serializable
 			}
 			else
 			{
-				if(nx > x || ny != y || distance_x > board[x][y].move_cells)
+				if(nx > x || ny != y || distance_x > board[x][y].info.move_cells)
 				{
 					return false;
 				}
@@ -63,7 +75,7 @@ public final class Pawn extends Piece implements Serializable
 				}
 			}
 		}
-		System.out.println("yay");
+		
 		return true;
 	}
 }

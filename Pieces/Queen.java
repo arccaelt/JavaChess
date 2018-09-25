@@ -1,7 +1,7 @@
 package Pieces;
 
 import static Board.Board.*;
-import static Pieces.PieceValue.*;
+import static Pieces.PieceData.*;
 import static java.lang.Math.abs;
 
 import java.io.Serializable;
@@ -13,7 +13,7 @@ public final class Queen extends Piece implements Serializable
 {
 	public Queen(int color)
 	{
-		super(QUEEN.getValue(), color, QUEEN.getMoveCells(), true, true, true, "Queen");
+		super(color, PieceData.BISHOP);
 	}
 	
 	public boolean isValidMove(Move mv, Piece board[][])

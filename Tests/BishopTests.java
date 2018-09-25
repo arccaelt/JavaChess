@@ -30,6 +30,9 @@ public class BishopTests {
 		b.move(1, 3, 3, 3);
 		assertTrue("A bishop SHOULD move on diagonals", b.move(0, 2, 3, 5));
 		assertTrue("A bishop SHOULD move on diagonals", b.move(3, 5, 5, 3));
-		assertTrue("A bishop SHOULD move on diagonals", b.move(5, 3, 2, 0));		
+		assertTrue("A bishop SHOULD move on diagonals", b.move(5, 3, 2, 0));	
+		
+		assertFalse("This should be illegal", b.move(0, 5, 1, 4));
+		assertFalse("This should be illegal", b.move(0, 5, 4, 1));
 	}
 }
